@@ -1,0 +1,50 @@
+version: '3'
+services:
+    nginx:
+        container_name: nginx
+        build:
+            context: ./api/docker/dev
+            dockerfile: nginx.docker
+        volumes:
+            - ./api/src:/app
+        depends_on:
+            - php-fpm
+        ports:
+            - 8080:80
+
+    php-fpm:
+        container_name: php-fpm
+        build:
+            context: ./api/docker/dev
+            dockerfile: php-fpm.docker
+        volumes:
+            - ./api/src:/app
+        depends_on:
+            - postgres
+
+    php-cli:
+        container_name: php-cli
+        build:
+            context: ./api/docker/dev
+            dockerfile: php-cli.docker
+        volumes:
+            - ./api/src:/app
+            - composer:/root/.composer/cache
+        depends_on:
+            - postgres
+
+    postgres:
+        container_name: postgres
+        image: postgres:13-alpine
+        volumes:
+            - postgres:/var/lib/postgresql/data
+        environment:
+            POSTGRES_USER: app
+            POSTGRES_PASSWORD: secret
+            POSTGRES_DB: app
+        ports:
+            - 54321:5432
+
+volumes:
+    postgres:
+    composer:
